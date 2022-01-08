@@ -14,6 +14,7 @@ namespace TruthTableGenerator.LogicEvaluator
         Conditional,
         Biconditional,
         ExclusiveOr,
+        Ldloc,
         LdBool = 999
     }
 }

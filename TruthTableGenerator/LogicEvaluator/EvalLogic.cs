@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -24,7 +24,7 @@ namespace TruthTableGenerator.LogicEvaluator
             }
             return true;
         }
-        internal static SyntaxErrorCode ExecuteInstructions(LogicInstructions[] instructions, out bool retResult)
+        internal static SyntaxErrorCode ExecuteInstructions(LogicInstructions[] instructions, Dictionary<string, bool> data, out bool retResult)
         {
             retResult = false;
             Stack<bool> MachineStack = new Stack<bool>();
@@ -36,6 +36,9 @@ namespace TruthTableGenerator.LogicEvaluator
                 {
                     case LogicalOperator.LdBool:
                         MachineStack.Push((bool)item.Operand);
+                        break;
+                    case LogicalOperator.Ldloc:
+                        MachineStack.Push(data[(string)item.Operand]);
                         break;
                     case LogicalOperator.Negation:
                         MachineStack.Push(!MachineStack.Pop());

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -31,7 +31,7 @@ namespace TruthTableGenerator.LogicEvaluator
             }
 
         };
-        internal static SyntaxErrorCode ParseExpressions(string s, Dictionary<string, bool> data, out LogicInstructions[] Result)
+        internal static SyntaxErrorCode ParseExpressions(string s, List<string> variables, out LogicInstructions[] Result)
         {
             Result = null;
             List<LogicInstructions> result = new List<LogicInstructions>();
@@ -51,10 +51,10 @@ namespace TruthTableGenerator.LogicEvaluator
                     tmpOperator[parenthesisCount].Push(instruction);
                     sb.Clear();
                 }
-                else if (currstr.All(x => char.IsLetter(x)) && data.ContainsKey(currstr))
+                else if (currstr.All(x => char.IsLetter(x)) && variables.Exists(x => x == currstr))
                 {
-                    var selectedData = data[currstr];
-                    result.Add(new LogicInstructions(LogicalOperator.LdBool, selectedData));
+                    //var selectedData = data[currstr];
+                    result.Add(new LogicInstructions(LogicalOperator.Ldloc, currstr));
                     sb.Clear();
 
                     if (tmpOperator.ContainsKey(parenthesisCount) && tmpOperator[parenthesisCount].Count > 0)
@@ -68,12 +68,12 @@ namespace TruthTableGenerator.LogicEvaluator
                         }
                     }
                 }
-                else if (currstr == "(")
+                else if (currstr == "(" || currstr == "[")
                 {
                     parenthesisCount++;
                     sb.Clear();
                 }
-                else if (currstr == ")")
+                else if (currstr == ")" || currstr == "]")
                 {
                     parenthesisCount--;
                     sb.Clear();

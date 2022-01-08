@@ -24,9 +24,11 @@ namespace TruthTableGenerator
         }
         void ListViewHeaderWidth(ListView listViewInfo)
         {
-            int HeaderWidth = (listViewInfo.Parent.Width - 2) / listViewInfo.Columns.Count;
+            /*int HeaderWidth = (listViewInfo.Parent.Width - 2) / listViewInfo.Columns.Count;
             foreach (ColumnHeader header in listViewInfo.Columns)
-                header.Width = HeaderWidth;
+                header.Width = HeaderWidth;*/
+            foreach (ColumnHeader header in listViewInfo.Columns)
+                header.Width += 5; 
         }
         void TruthTableListView_ColumnWidthChanging(object sender, ColumnWidthChangingEventArgs e)
         {

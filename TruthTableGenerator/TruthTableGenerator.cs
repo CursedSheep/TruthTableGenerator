@@ -75,50 +75,75 @@ namespace TruthTableGenerator
             {
                 var LogicVariables = GetVariables(formulaTxt.Text);
                 var GeneratedTruthTable = GenerateTable(LogicVariables.Count);
-                List<bool> formulaResult = new List<bool>();
-                for (int i = 0; i < GeneratedTruthTable.GetLength(1); i++)
+                var isValid1 = TruthTableLogic.GetExpressions(formulaTxt.Text, LogicVariables, out List<(string str, LogicInstructions[] Instructions)> InstructionBlocks);
+                if(isValid1 == SyntaxErrorCode.Valid)
                 {
-                    Dictionary<string, bool> varList = new Dictionary<string, bool>();
-                    for (int j = 0; j < GeneratedTruthTable.GetLength(0); j++)
-                        varList.Add(LogicVariables[j], GeneratedTruthTable[j, i]);
-
-                    var evalItem = TruthTableLogic.EvaluateExpression(formulaTxt.Text, varList, out bool result);
-                    if (evalItem == SyntaxErrorCode.Valid)
-                        formulaResult.Add(result);
-                    else
+                    Dictionary<string, List<bool>> formulaResult = new Dictionary<string, List<bool>>();
+                    for (int i = 0; i < GeneratedTruthTable.GetLength(1); i++)
                     {
-                        SetProgramStatus(evalItem);
-                        TruthTableListView.Columns.Clear();
-                        TruthTableListView.Items.Clear();
-                        return;
+                        Dictionary<string, bool> varList = new Dictionary<string, bool>();
+                        for (int j = 0; j < GeneratedTruthTable.GetLength(0); j++)
+                            varList.Add(LogicVariables[j], GeneratedTruthTable[j, i]);
+
+                        foreach(var formula in InstructionBlocks)
+                        {
+                            var evalItem = TruthTableLogic.EvaluateExpression(formula.Instructions, varList, out bool result);
+                            if (evalItem == SyntaxErrorCode.Valid)
+                            {
+                                if (!formulaResult.ContainsKey(formula.str))
+                                    formulaResult[formula.str] = new List<bool>();
+
+                                formulaResult[formula.str].Add(result);
+                            }
+                            else
+                            {
+                                SetProgramStatus(evalItem);
+                                TruthTableListView.Columns.Clear();
+                                TruthTableListView.Items.Clear();
+                                return;
+                            }
+                        }
+
                     }
 
-                }
+                    //clear all data in table
+                    TruthTableListView.Columns.Clear();
+                    TruthTableListView.Items.Clear();
 
-                //clear all data in table
-                TruthTableListView.Columns.Clear();
-                TruthTableListView.Items.Clear();
+                    foreach (var v in LogicVariables)
+                        TruthTableListView.Columns.Add(v);
 
-                foreach (var v in LogicVariables)
-                    TruthTableListView.Columns.Add(v);
+                    var formulaList = InstructionBlocks.Select(x => x.str);
+                    foreach (var f in formulaList)
+                        TruthTableListView.Columns.Add(f);
 
-                TruthTableListView.Columns.Add(formulaTxt.Text);
-
-                for (int i = 0; i < GeneratedTruthTable.GetLength(1); i++)
-                {
-                    List<string> str = new List<string>();
-                    for(int j = 0; j < GeneratedTruthTable.GetLength(0); j++)
+                    for (int i = 0; i < GeneratedTruthTable.GetLength(1); i++)
                     {
-                        str.Add(GeneratedTruthTable[j, i] ? "T" : "F");
+                        List<string> str = new List<string>();
+                        for (int j = 0; j < GeneratedTruthTable.GetLength(0); j++)
+                        {
+                            str.Add(GeneratedTruthTable[j, i] ? "T" : "F");
+                        }
+                        foreach (var f in formulaList)
+                        {
+                            str.Add(formulaResult[f][i] ? "T" : "F");
+                        }
+                           
+                        TruthTableListView.Items.Add(new ListViewItem(str.ToArray()));
                     }
-                    str.Add(formulaResult[i] ? "T" : "F");
-                    TruthTableListView.Items.Add(new ListViewItem(str.ToArray()));
+
+                    TruthTableListView.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
+                    ListViewHeaderWidth(TruthTableListView);
+
+                    SetProgramStatus(SyntaxErrorCode.Valid);
                 }
-
-                TruthTableListView.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
-                ListViewHeaderWidth(TruthTableListView);
-
-                SetProgramStatus(SyntaxErrorCode.Valid);
+                else
+                {
+                    SetProgramStatus(isValid1);
+                    TruthTableListView.Columns.Clear();
+                    TruthTableListView.Items.Clear();
+                    return;
+                }
             }
             else
             {

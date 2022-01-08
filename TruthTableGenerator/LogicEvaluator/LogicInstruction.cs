@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,10 +17,11 @@ namespace TruthTableGenerator.LogicEvaluator
         }
         public override string ToString()
         {
-            if (Operator == LogicalOperator.LdBool)
-                return $"{Operator},{Operand ?? ""}";
+            bool isoperandnull = Operand == null;
+            if (Operator == LogicalOperator.LdBool || Operator == LogicalOperator.Ldloc)
+                return $"{Operator}{(isoperandnull ? "" : ",")}{Operand ?? ""}";
             else
-                return $"{stringOperators[Operator]},{Operand ?? ""}";
+                return $"{stringOperators[Operator]}";
         }
         static Dictionary<LogicalOperator, string> stringOperators = new Dictionary<LogicalOperator, string>() {
 

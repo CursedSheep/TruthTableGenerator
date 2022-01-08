@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,9 +19,9 @@ namespace TruthTableGenerator.LogicEvaluator
         {
             int num = 0;
             for (int i = 0; i < input.Length; i++)
-                if (input[i] == '(')
+                if (input[i] == '(' || input[i] == '[')
                     num++;
-                else if (input[i] == ')')
+                else if (input[i] == ')' || input[i] == ']')
                     num--;
             return num == 0;
         }
@@ -31,7 +31,9 @@ namespace TruthTableGenerator.LogicEvaluator
                       .Replace("¬", "~")
                       .Replace("↔", "⟷")
                       .Replace("∼", "~")
-                      .Replace("⇒", "→");
+                      .Replace("⇒", "→")
+                      .Replace("⇔", "⟷")
+                      .Replace("⊻", "⊕");
         }
         public static SyntaxErrorCode isInputValid(string input)
         {
@@ -42,22 +44,35 @@ namespace TruthTableGenerator.LogicEvaluator
 
             return SyntaxErrorCode.Valid;
         }
-        public static SyntaxErrorCode EvaluateExpression(string s, Dictionary<string, bool> data, out bool Result)
+        public static SyntaxErrorCode GetExpressions(string s, List<string> variables, out List<(string str, LogicInstructions[] Instructions)> InstructionBlocks)
         {
-            Result = false;
+            InstructionBlocks = new List<(string str, LogicInstructions[] Instructions)>();
             s = ReplaceSymbols(s);
             var isValid = isInputValid(s);
-            if(isValid == SyntaxErrorCode.Valid)
+            if (isValid == SyntaxErrorCode.Valid)
             {
-                isValid = LogicStrToInstr.ParseExpressions(s, data, out LogicInstructions[] r);
-                if(isValid == SyntaxErrorCode.Valid)
+                isValid = LogicStrToInstr.ParseExpressions(s, variables, out LogicInstructions[] r);
+                if (isValid == SyntaxErrorCode.Valid)
                 {
-                    isValid = EvalLogic.ExecuteInstructions(r, out bool Result2);
-                    if(isValid == SyntaxErrorCode.Valid)
+                    var test = new StepByStepUtilities(r);
+                    var countz = test.GetBlockCount();
+                    for (int i = 0; i < countz; i++)
                     {
-                        Result = Result2;
+                        var block = test.GetBlock(i);
+                        var str = test.InstrsToString(block.ToArray(), out _);
+                        InstructionBlocks.Add((str, block.ToArray()));
                     }
                 }
+            }
+            return isValid;
+        }
+        public static SyntaxErrorCode EvaluateExpression(LogicInstructions[] s, Dictionary<string, bool> data, out bool Result)
+        {
+            Result = false;
+            var isValid = EvalLogic.ExecuteInstructions(s, data, out bool Result2);
+            if (isValid == SyntaxErrorCode.Valid)
+            {
+                Result = Result2;
             }
             return isValid;
         }

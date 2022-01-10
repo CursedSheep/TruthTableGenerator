@@ -100,11 +100,11 @@ namespace TruthTableGenerator.LogicEvaluator
                         else
                         {
                             lclname1 = (string)Instrs[i - 1].Operand;
+                            i -= 1;
                         }
                         sb.Append(lclname1);
                         sb.Append(operatorstr);
                         sb.Append(secondpart);
-                        i -= 1;
 
                     }
                     else

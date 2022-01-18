@@ -107,6 +107,20 @@ namespace TruthTableGenerator.LogicEvaluator
                         sb.Append(secondpart);
 
                     }
+                    else if (i - 2 > -1 && (int)Instrs[i - 2].Operator >= 0 && (int)Instrs[i - 2].Operator <= 5)
+                    {
+                        var operatorstr = Instrs[i].ToString();
+                        var z = new StepByStepUtilities(Instrs);
+                        var blokCount = z.GetBlockCount() - 2;
+                        var getBlockz = z.GetBlock(blokCount);
+                        var secondpart = z.InstrsToString(getBlockz.ToArray(), out int nMin);
+                        var lclname1 = (string)Instrs[i - 1].Operand;
+                        i -= 1;
+                        i += nMin;
+                        sb.Append(secondpart);
+                        sb.Append(operatorstr);
+                        sb.Append(lclname1);
+                    }
                     else
                     {
                         var lclname1 = (string)Instrs[i - 2].Operand;
